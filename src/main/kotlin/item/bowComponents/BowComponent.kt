@@ -2,27 +2,34 @@ package de.chaos.item.bowComponents
 
 import com.typewritermc.core.books.pages.Colors
 import com.typewritermc.core.extension.annotations.AlgebraicTypeInfo
+import de.chaos.item.BaseComponent
+import org.bukkit.Location
+import org.bukkit.entity.LivingEntity
 import org.bukkit.entity.Player
+import org.bukkit.event.entity.EntityShootBowEvent
 import org.bukkit.inventory.ItemStack
 
 @AlgebraicTypeInfo("bow", Colors.BLUE, "fa6-solid:hashtag")
-sealed interface BowComponent {
+sealed interface BowComponent : BaseComponent {
 
-    /**
-     * Wendet die spezifischen Eigenschaften dieser Komponente auf einen gegebenen ItemStack an.
-     * Dies umfasst typischerweise das Setzen von DisplayName, Lore und anderen Metadaten.
-     *
-     * @param itemStack Der Basis-ItemStack, der modifiziert werden soll.
-     * @return Der modifizierte ItemStack.
-     */
-    fun build(itemStack: ItemStack): ItemStack
 
-    /**
-     * Führt die Logik dieses Item-Typs aus, wenn das Item benutzt wird.
-     *
-     * @param player Der Spieler, der die Aktion ausführt.
-     * @param itemStack Das Item, das die Aktion ausgelöst hat.
-     */
-    fun execute(player: Player, itemStack: ItemStack)
+    fun execute(
+        player: Player,
+        bow: ItemStack,
+        damage: Double,
+        hitEntity: LivingEntity,
+        onDamageDealt: (target: LivingEntity, damage: Double, isCrit: Boolean) -> Unit = { _, _, _ -> }
+    )
 
+
+    fun executeOnBlockHit(
+        player: Player,
+        bow: ItemStack,
+        location: Location,
+        onDamageDealt: (target: LivingEntity, damage: Double, isCrit: Boolean) -> Unit = { _, _, _ -> }
+    ) {
+    }
+
+    fun onShoot(player: Player, bow: ItemStack, event: EntityShootBowEvent) {
+    }
 }

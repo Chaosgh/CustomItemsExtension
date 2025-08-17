@@ -9,7 +9,7 @@ import com.typewritermc.engine.paper.entry.TriggerableEntry
 import com.typewritermc.engine.paper.entry.entries.ActionEntry
 import com.typewritermc.engine.paper.entry.entries.ActionTrigger
 import com.typewritermc.engine.paper.logger
-import de.chaos.gui.ItemsGui
+import de.chaos.ItemsGui
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import org.bukkit.plugin.Plugin
@@ -25,21 +25,16 @@ class OpenItemsGuiAction(
     override fun ActionTrigger.execute() {
         val player: Player = player ?: return
 
-        // KORREKTE LÖSUNG FÜR EXTENSIONS:
-        // Holen Sie sich die Instanz des laufenden Typewriter-Plugins.
+
         val typewriterPlugin: Plugin? = Bukkit.getPluginManager().getPlugin("Typewriter")
 
-        // Sicherheitsüberprüfung: Wenn Typewriter aus irgendeinem Grund nicht gefunden wird,
-        // brechen Sie die Aktion ab, um Fehler zu vermeiden.
         if (typewriterPlugin == null || !typewriterPlugin.isEnabled) {
             logger.severe("Typewriter plugin could not be found or is disabled. Cannot open GUI.")
             return
         }
 
-        // Erstellen Sie die GUI mit der erhaltenen Plugin-Instanz.
         val itemsGui = ItemsGui(typewriterPlugin)
 
-        // Öffnen Sie die GUI für den Spieler.
         itemsGui.open(player)
     }
 }

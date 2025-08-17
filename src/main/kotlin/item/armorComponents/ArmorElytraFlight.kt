@@ -7,18 +7,24 @@ import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 
 
-
-@AlgebraicTypeInfo("custom data", Colors.BLUE, "fa6-solid:hashtag")
+@AlgebraicTypeInfo("elytra flight", Colors.BLUE, "fa6-solid:hashtag")
 
 class ArmorElytraFlight(
 
-    ) : ArmorComponent {
+) : ArmorComponent {
 
     override fun build(itemStack: ItemStack): ItemStack {
-        TODO("Not yet implemented")
+        return itemStack
     }
 
     override fun execute(player: Player, itemStack: ItemStack) {
-        TODO("Not yet implemented")
     }
+
+
+    override fun getFactoryString(): String {
+
+        return "glider={}"
+    }
+
+
 }

@@ -2,74 +2,110 @@ package de.chaos.item
 
 import com.typewritermc.core.books.pages.Colors
 import com.typewritermc.core.extension.annotations.AlgebraicTypeInfo
+import com.typewritermc.core.extension.annotations.Help
+import com.typewritermc.engine.paper.entry.entries.ConstVar
+import com.typewritermc.engine.paper.entry.entries.Var
+import com.typewritermc.engine.paper.utils.Sound
 import de.chaos.enums.ArmorType
 import de.chaos.item.armorComponents.ArmorComponent
-import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.format.NamedTextColor
-import org.bukkit.attribute.Attribute // <-- WICHTIGER IMPORT
-import org.bukkit.attribute.AttributeModifier
+import de.chaos.item.itemComponents.ItemComponent
+import org.bukkit.Bukkit
+import org.bukkit.NamespacedKey
 import org.bukkit.entity.Player
-import org.bukkit.inventory.EquipmentSlot // <-- WICHTIGER IMPORT
 import org.bukkit.inventory.ItemStack
-import java.util.*
+import org.bukkit.inventory.meta.ItemMeta
+import org.bukkit.persistence.PersistentDataType
 
 @AlgebraicTypeInfo("armor", Colors.BLUE, "fa6-solid:hashtag")
 class ItemTypeArmor(
-    val type: ArmorType = ArmorType.HELMET, // Ihr Enum, z.B. ArmorType.HELMET
+    val armorType: ArmorType = ArmorType.HELMET,
     val armorValue: Double = 1.0,
-    val components: List<ArmorComponent> = emptyList()
+    val armorToughness: Double = 0.0,
+    val durability: Int = 55,
+    @Help("Asset ID for armor appearance (e.g. minecraft:diamond, minecraft:leather)") val assetId: String = "",
+    @Help("Sound played when equipping the armor") val sound: Var<Sound> = ConstVar(Sound.EMPTY),
+    @Help("Armor components for additional functionality") val components: List<ArmorComponent> = emptyList(),
+    @Help("item components for additional functionality") val itemComponent: List<ItemComponent> = emptyList()
 ) : ItemTypeComponent {
 
-    override fun build(itemStack: ItemStack): ItemStack {
-        // Der passende EquipmentSlot wird hier basierend auf Ihrem Enum ermittelt
-        val equipmentSlot = when (type) {
-            ArmorType.HELMET -> EquipmentSlot.HEAD
-            ArmorType.CHESTPLATE -> EquipmentSlot.CHEST
-            ArmorType.LEGGINGS -> EquipmentSlot.LEGS
-            ArmorType.BOOTS -> EquipmentSlot.FEET
-            // Fügen Sie hier weitere Typen hinzu, falls Ihr Enum mehr hat
+    override fun build(itemStack: ItemStack, id: String): ItemStack {
+        val oldMeta: ItemMeta = itemStack.itemMeta ?: return itemStack
+        val displayName = oldMeta.displayName()
+        val lore = oldMeta.lore()
+        val customModelData = if (oldMeta.hasCustomModelData()) oldMeta.customModelData else null
+
+        val materialKey = itemStack.type.key.toString()
+        val slot = armorSlotOf(armorType)
+        val armorJson = buildArmorJson(materialKey, slot)
+        val newItem = Bukkit.getItemFactory().createItemStack(armorJson)
+        val newMeta = newItem.itemMeta
+
+        val pdc = newMeta.persistentDataContainer
+        pdc.set(ENTRY_ID, PersistentDataType.STRING, id)
+
+        newMeta.displayName(displayName)
+        newMeta.lore(lore)
+        newMeta.setCustomModelData(customModelData)
+        newItem.itemMeta = newMeta
+
+        val afterTypeSpecific = components.fold(newItem) { acc, c -> c.build(acc) }
+        return itemComponent.fold(afterTypeSpecific) { acc, c -> c.build(acc) }
+    }
+
+    private fun armorSlotOf(type: ArmorType): String {
+        return when (type) {
+            ArmorType.HELMET -> "head"
+            ArmorType.CHESTPLATE -> "chest"
+            ArmorType.LEGGINGS -> "legs"
+            ArmorType.BOOTS -> "feet"
         }
+    }
 
-        itemStack.editMeta { meta ->
+    private fun buildArmorJson(materialKey: String, slot: String): String {
+        val effectiveAssetId = assetId.ifBlank { "minecraft:diamond" }
 
-            val lore = mutableListOf<Component>()
-            lore.add(Component.empty()) // Leerzeile für besseres Layout
-            lore.add(
-                Component.text("Wenn ausgerüstet in Slot: ", NamedTextColor.GRAY)
-                    .append(Component.text(equipmentSlot.name.lowercase(), NamedTextColor.BLUE))
-            )
-            lore.add(Component.empty())
+        val soundString = if (sound is ConstVar<Sound> && sound.value != Sound.EMPTY) {
+            sound.value.soundId.namespacedKey?.toString()
+        } else null
 
-            // TODO: Fügen Sie hier Logik hinzu, um Beschreibungen von Ihren 'ArmorComponent'-Klassen zu erhalten.
-            // Beispiel:
-            // components.forEach { component ->
-            //     lore.add(component.getLoreDescription())
-            // }
+        return buildString {
+            append("$materialKey[")
+            append("max_stack_size=1,")
+            append("max_damage=$durability,")
+            append("damage=0,")
+            append("equippable={slot:\"$slot\",asset_id:\"$effectiveAssetId\"")
+            if (soundString != null) {
+                append(",equip_sound:\"$soundString\"")
+            }
+            append(",dispensable:true},")
+            append("attribute_modifiers=[")
+            append("{type:\"minecraft:armor\",amount:$armorValue,operation:\"add_value\",slot:\"$slot\",id:\"chaos:${slot}_armor_value\"},")
+            append("{type:\"minecraft:armor_toughness\",amount:$armorToughness,operation:\"add_value\",slot:\"$slot\",id:\"chaos:${slot}_armor_toughness\"}")
+            append("]")
 
-            meta.lore(lore)
+            val componentStrings = components.mapNotNull { it.getFactoryString().takeIf { str -> str.isNotBlank() } }
+            if (componentStrings.isNotEmpty()) {
+                append(",")
+                append(componentStrings.joinToString(","))
+            }
 
-            // Attribute-Modifier für den Rüstungswert hinzufügen
-            val modifier = AttributeModifier(
-                UUID.randomUUID(), // Einzigartige ID für diesen Modifier
-                "generic.armor",   // Der Name des Minecraft-Attributs für Rüstung
-                armorValue,        // Der Wert, der hinzugefügt wird
-                AttributeModifier.Operation.ADD_NUMBER,
-                equipmentSlot      // Der Bonus ist nur aktiv, wenn das Item im richtigen Slot ist
-            )
-
-            // Das Attribut zum Item hinzufügen
-            meta.addAttributeModifier(Attribute.ARMOR, modifier)
-
-            // Weitere nützliche Eigenschaften
-            meta.isUnbreakable = true
+            append("]")
         }
-        return itemStack
     }
 
     override fun execute(player: Player, itemStack: ItemStack) {
-        // Delegiert die Ausführung an die untergeordneten Komponenten
         components.forEach { component ->
             component.execute(player, itemStack)
+        }
+    }
+
+    companion object {
+        val ENTRY_ID = NamespacedKey("chaos", "armor_entry_id")
+
+
+        fun getArmorID(itemStack: ItemStack): String? {
+            val meta = itemStack.itemMeta ?: return null
+            return meta.persistentDataContainer.get(ENTRY_ID, PersistentDataType.STRING)
         }
     }
 }

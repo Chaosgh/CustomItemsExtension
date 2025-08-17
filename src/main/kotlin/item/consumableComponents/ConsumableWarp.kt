@@ -5,17 +5,21 @@ import com.typewritermc.core.extension.annotations.AlgebraicTypeInfo
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 
-@AlgebraicTypeInfo("warp", Colors.BLUE, "fa6-solid:hashtag")
-class ConsumableWarp(
+@AlgebraicTypeInfo("warp", Colors.BLUE, "fa6-solid:location-arrow")
+data class ConsumableWarp(
     val radius: Double = 5.0,
-) : ConsumableComponent {
+) : ConsumableComponent, ConsumableComponentHolder {
+
     override fun build(itemStack: ItemStack): ItemStack {
-        TODO("Not yet implemented")
+        return itemStack
     }
 
     override fun execute(player: Player, itemStack: ItemStack) {
-        TODO("Not yet implemented")
     }
 
+    override fun getConsumeEffectJson(): String {
+        return "{type:\"minecraft:teleport_randomly\",diameter:$radius}"
+    }
 
+    override fun getComponent(): ConsumableComponent = this
 }

@@ -2,7 +2,7 @@ package de.chaos.item.swordComponents
 
 import com.typewritermc.core.books.pages.Colors
 import com.typewritermc.core.extension.annotations.AlgebraicTypeInfo
-import com.typewritermc.core.interaction.InteractionContext
+import org.bukkit.entity.LivingEntity
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 
@@ -10,13 +10,17 @@ import org.bukkit.inventory.ItemStack
 class SwordIgnite(
     val duration: Double = 1.0,
 ) : SwordComponent {
+
     override fun build(itemStack: ItemStack): ItemStack {
-        TODO("Not yet implemented")
+
+        return itemStack
     }
 
     override fun execute(player: Player, itemStack: ItemStack) {
-        TODO("Not yet implemented")
     }
 
-
+    override fun execute(player: Player, itemStack: ItemStack, damageDealt: Double, hitEntity: LivingEntity) {
+        val ticks = (duration * 20).toInt()
+        hitEntity.fireTicks = hitEntity.fireTicks.coerceAtLeast(ticks)
+    }
 }

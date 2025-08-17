@@ -4,8 +4,7 @@ import com.typewritermc.core.books.pages.Colors
 import com.typewritermc.core.extension.annotations.AlgebraicTypeInfo
 import de.chaos.item.BaseComponent
 
-@AlgebraicTypeInfo("consumable", Colors.BLUE, "lucide-lab:apple-core")
-sealed interface ConsumableComponent : BaseComponent {
-
-    fun getConsumeEffectJson(): String? = null
+@AlgebraicTypeInfo("consumable_component_holder", Colors.BLUE, "fa6-solid:puzzle-piece")
+sealed interface ConsumableComponentHolder : BaseComponent {
+    fun getComponent(): ConsumableComponent
 }
