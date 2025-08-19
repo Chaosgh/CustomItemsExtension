@@ -3,8 +3,8 @@ package de.chaos.item
 import com.typewritermc.core.books.pages.Colors
 import com.typewritermc.core.extension.annotations.AlgebraicTypeInfo
 import com.typewritermc.core.extension.annotations.Help
-import de.chaos.enums.ToolType
 import de.chaos.data.ToolRule
+import de.chaos.enums.ToolType
 import de.chaos.item.itemComponents.ItemComponent
 import de.chaos.item.toolComponents.ToolComponent
 import org.bukkit.entity.Player
@@ -34,9 +34,6 @@ class ItemTypeTool(
         val newMeta = newItem.itemMeta
 
         val pdc = newMeta.persistentDataContainer
-        pdc.set(KEY_BREAK_SPEED, org.bukkit.persistence.PersistentDataType.DOUBLE, breakSpeed)
-        pdc.set(KEY_TOOL_TYPE, org.bukkit.persistence.PersistentDataType.STRING, toolType.name)
-        pdc.set(KEY_DAMAGE_PER_BLOCK, org.bukkit.persistence.PersistentDataType.INTEGER, damagePerBlock)
         pdc.set(ENTRY_ID, org.bukkit.persistence.PersistentDataType.STRING, id)
 
         newMeta.displayName(displayName)
@@ -116,9 +113,6 @@ class ItemTypeTool(
     }
 
     companion object {
-        val KEY_BREAK_SPEED = org.bukkit.NamespacedKey("chaos", "tool_break_speed")
-        val KEY_TOOL_TYPE = org.bukkit.NamespacedKey("chaos", "tool_type")
-        val KEY_DAMAGE_PER_BLOCK = org.bukkit.NamespacedKey("chaos", "tool_damage_per_block")
         val ENTRY_ID = org.bukkit.NamespacedKey("chaos", "entry_id")
 
         fun getToolID(itemStack: ItemStack): String? {
@@ -126,15 +120,6 @@ class ItemTypeTool(
             return meta.persistentDataContainer.get(ENTRY_ID, org.bukkit.persistence.PersistentDataType.STRING)
         }
 
-        fun getBreakSpeed(itemStack: ItemStack): Double? {
-            val meta = itemStack.itemMeta ?: return null
-            return meta.persistentDataContainer.get(KEY_BREAK_SPEED, org.bukkit.persistence.PersistentDataType.DOUBLE)
-        }
 
-        fun getToolType(itemStack: ItemStack): de.chaos.enums.ToolType? {
-            val meta = itemStack.itemMeta ?: return null
-            val typeStr = meta.persistentDataContainer.get(KEY_TOOL_TYPE, org.bukkit.persistence.PersistentDataType.STRING) ?: return null
-            return try { de.chaos.enums.ToolType.valueOf(typeStr) } catch (_: IllegalArgumentException) { null }
-        }
     }
 }

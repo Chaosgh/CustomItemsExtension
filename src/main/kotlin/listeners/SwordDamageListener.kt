@@ -36,29 +36,21 @@ class SwordDamageListener(private val plugin: Plugin) : Listener {
             return
         }
 
+        // Fetch stats from the entry’s item definition (not from PDC)
+        val customItem = entry.customItem as? ItemTypeSword ?: return
 
-
-        val stats = ItemTypeSword.getSwordStats(item) ?: return
-
-        val isCrit = Random.nextDouble(0.0, 1.0) < stats.critChance
-
-        var damage = stats.baseDamage
+        val isCrit = Random.nextDouble(0.0, 1.0) < customItem.basecritChance
+        var damage = customItem.baseDamage
         if (isCrit) {
-            damage *= stats.critMultiplier
+            damage *= customItem.basecritMultiplier
         }
 
-
-        val customItem = entry.customItem
-        if (customItem is ItemTypeSword) {
-            customItem.components.forEach { component: SwordComponent ->
-                component.execute(player, item, damage, hitEntity)
-            }
+        // Execute components
+        customItem.components.forEach { component: SwordComponent ->
+            component.execute(player, item, damage, hitEntity)
         }
-
-
 
         event.damage = damage
-
 
         val targetEntity = event.entity
         if (targetEntity is LivingEntity) {

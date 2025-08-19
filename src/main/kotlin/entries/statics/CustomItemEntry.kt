@@ -1,11 +1,12 @@
 package de.chaos.entries.statics
 
 import com.typewritermc.core.books.pages.Colors.PURPLE
+import com.typewritermc.core.extension.annotations.Colored
 import com.typewritermc.core.extension.annotations.Entry
+import com.typewritermc.core.extension.annotations.MultiLine
 import com.typewritermc.engine.paper.entry.StaticEntry
 import com.typewritermc.engine.paper.entry.entries.ConstVar
 import com.typewritermc.engine.paper.entry.entries.Var
-import com.typewritermc.engine.paper.utils.item.components.ItemMaterialComponent
 import de.chaos.item.ItemTypeComponent
 import org.bukkit.Material
 
@@ -14,8 +15,9 @@ class CustomItemEntry(
     override val id: String = "",
     override val name: String = "",
     val displayName: String = "",
-    val item: Var<ItemMaterialComponent> = ConstVar(
-        ItemMaterialComponent(material = ConstVar(Material.STONE))
-    ),
+    @Colored
+    @MultiLine
+    val lore: String = "",
+    val item: Var<Material> = ConstVar(Material.AIR),
     val customItem: ItemTypeComponent? = null
 ) : StaticEntry

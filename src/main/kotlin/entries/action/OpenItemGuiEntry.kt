@@ -15,12 +15,14 @@ import org.bukkit.entity.Player
 import org.bukkit.plugin.Plugin
 
 @Entry("open_item_gui", "opens the gui with all the custom items", Colors.RED, "pixel:bullet-list")
-class OpenItemsGuiAction(
+class OpenItemGuiEntry(
     override val id: String = "",
     override val name: String = "",
     override val criteria: List<Criteria> = emptyList(),
     override val modifiers: List<Modifier> = emptyList(),
     override val triggers: List<Ref<TriggerableEntry>> = emptyList(),
+
+
 ) : ActionEntry {
     override fun ActionTrigger.execute() {
         val player: Player = player ?: return

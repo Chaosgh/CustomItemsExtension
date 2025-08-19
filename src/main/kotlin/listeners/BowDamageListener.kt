@@ -22,7 +22,6 @@ class BowDamageListener(private val plugin: Plugin) : Listener {
 
     private val damageIndicator = DamageIndicator(plugin)
 
-
     @EventHandler
     fun onBowShoot(event: EntityShootBowEvent) {
         val player = event.entity as? Player ?: return
@@ -31,15 +30,12 @@ class BowDamageListener(private val plugin: Plugin) : Listener {
 
         val bowId = ItemTypeBow.getBowID(bow) ?: return
 
-        val stats = ItemTypeBow.getBowStats(bow) ?: return
         val entry = Query.findById<CustomItemEntry>(bowId) ?: return
         val customItem = entry.customItem as? ItemTypeBow ?: return
 
+        // Only store entry id on the arrow now
         val pdc = arrow.persistentDataContainer
         pdc.set(ItemTypeBow.ENTRY_ID, PersistentDataType.STRING, bowId)
-        pdc.set(ItemTypeBow.KEY_BASE_DAMAGE, PersistentDataType.DOUBLE, stats.baseDamage)
-        pdc.set(ItemTypeBow.KEY_BASE_CRIT_CHANCE, PersistentDataType.DOUBLE, stats.critChance)
-        pdc.set(ItemTypeBow.KEY_BASE_CRIT_MULTIPLIER, PersistentDataType.DOUBLE, stats.critMultiplier)
 
         customItem.components.forEach { component ->
             component.onShoot(player, bow, event)
@@ -84,33 +80,30 @@ class BowDamageListener(private val plugin: Plugin) : Listener {
         val arrowPdc = arrow.persistentDataContainer
         val bowId = arrowPdc.get(ItemTypeBow.ENTRY_ID, PersistentDataType.STRING) ?: return
 
-        val baseDamage = arrowPdc.get(ItemTypeBow.KEY_BASE_DAMAGE, PersistentDataType.DOUBLE) ?: return
-        val critChance = arrowPdc.get(ItemTypeBow.KEY_BASE_CRIT_CHANCE, PersistentDataType.DOUBLE) ?: return
-        val critMultiplier = arrowPdc.get(ItemTypeBow.KEY_BASE_CRIT_MULTIPLIER, PersistentDataType.DOUBLE) ?: return
-
         val entry = Query.findById<CustomItemEntry>(bowId)
         if (entry == null) {
             player.sendMessage("§cUngültige Bogen-Eintrag-ID: $bowId")
             return
         }
 
-        val isCrit = Random.nextDouble(0.0, 1.0) < critChance
-        val damage = if (isCrit) baseDamage * critMultiplier else baseDamage
+        val customItem = entry.customItem as? ItemTypeBow ?: return
 
-        val customItem = entry.customItem
-        if (customItem is ItemTypeBow) {
-            val bowItem = player.inventory.itemInMainHand.takeIf { ItemTypeBow.getBowID(it) == bowId }
-                ?: player.inventory.itemInOffHand.takeIf { ItemTypeBow.getBowID(it) == bowId }
+        // Compute stats from the entry’s item definition (not from PDC)
+        val isCrit = Random.nextDouble(0.0, 1.0) < customItem.basecritChance
+        val damage = if (isCrit) customItem.baseDamage * customItem.basecritMultiplier else customItem.baseDamage
 
-            if (bowItem != null) {
-                customItem.components.forEach { component: BowComponent ->
-                    component.execute(player, bowItem, damage, hitEntity) { target, dmg, crit ->
-                        damageIndicator.showDamage(
-                            location = target.location,
-                            damage = dmg,
-                            isCrit = crit
-                        )
-                    }
+        // Execute components if player still holds corresponding bow (optional check preserved)
+        val bowItem = player.inventory.itemInMainHand.takeIf { ItemTypeBow.getBowID(it) == bowId }
+            ?: player.inventory.itemInOffHand.takeIf { ItemTypeBow.getBowID(it) == bowId }
+
+        if (bowItem != null) {
+            customItem.components.forEach { component: BowComponent ->
+                component.execute(player, bowItem, damage, hitEntity) { target, dmg, crit ->
+                    damageIndicator.showDamage(
+                        location = target.location,
+                        damage = dmg,
+                        isCrit = crit
+                    )
                 }
             }
         }

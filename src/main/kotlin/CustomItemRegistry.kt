@@ -10,7 +10,9 @@ data class CustomItem(
     val id: String,
     val material: Material,
     val component: ItemTypeComponent,
-    val displayName: Component
+    val displayName: Component,
+
+    val lore: List<Component>
 ) {
 
     fun buildItemStack(): ItemStack {
@@ -18,6 +20,7 @@ data class CustomItem(
         val meta = baseStack.itemMeta
 
         meta.displayName(displayName)
+        meta.lore(lore)
         baseStack.itemMeta = meta
 
 

@@ -33,9 +33,7 @@ class ItemTypeBow(
         val newMeta = newItem.itemMeta
 
         val pdc = newMeta.persistentDataContainer
-        pdc.set(KEY_BASE_DAMAGE, PersistentDataType.DOUBLE, baseDamage)
-        pdc.set(KEY_BASE_CRIT_CHANCE, PersistentDataType.DOUBLE, basecritChance)
-        pdc.set(KEY_BASE_CRIT_MULTIPLIER, PersistentDataType.DOUBLE, basecritMultiplier)
+        // Removed writing damage/crit stats to PDC
         pdc.set(ENTRY_ID, PersistentDataType.STRING, id)
 
         newMeta.displayName(displayName)
@@ -58,21 +56,8 @@ class ItemTypeBow(
     }
 
     companion object {
-        val KEY_BASE_DAMAGE = NamespacedKey("chaos", "bow_base_damage")
-        val KEY_BASE_CRIT_CHANCE = NamespacedKey("chaos", "bow_base_crit_chance")
-        val KEY_BASE_CRIT_MULTIPLIER = NamespacedKey("chaos", "bow_base_crit_multiplier")
+        // Removed damage-related keys and getBowStats, keep only entry id
         val ENTRY_ID = NamespacedKey("chaos", "entry_id")
-
-        fun getBowStats(itemStack: ItemStack): BowStats? {
-            val meta = itemStack.itemMeta ?: return null
-            val pdc = meta.persistentDataContainer
-
-            val baseDamage = pdc.get(KEY_BASE_DAMAGE, PersistentDataType.DOUBLE) ?: return null
-            val critChance = pdc.get(KEY_BASE_CRIT_CHANCE, PersistentDataType.DOUBLE) ?: return null
-            val critMultiplier = pdc.get(KEY_BASE_CRIT_MULTIPLIER, PersistentDataType.DOUBLE) ?: return null
-
-            return BowStats(baseDamage, critChance, critMultiplier)
-        }
 
         fun getBowID(itemStack: ItemStack): String? {
             val meta = itemStack.itemMeta ?: return null

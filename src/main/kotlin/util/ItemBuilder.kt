@@ -48,6 +48,12 @@ class ItemBuilder(material: Material) {
     }
 
 
+    fun setEnchantable(enchantable: Int): ItemBuilder {
+        itemMeta.setEnchantable(enchantable)
+        return this
+    }
+
+
     fun build(): ItemStack {
         itemStack.itemMeta = itemMeta
         return itemStack

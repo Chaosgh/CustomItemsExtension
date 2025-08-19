@@ -36,9 +36,6 @@ class ItemTypeSword(
         val newMeta = newItem.itemMeta
 
         val pdc = newMeta.persistentDataContainer
-        pdc.set(KEY_BASE_DAMAGE, PersistentDataType.DOUBLE, baseDamage)
-        pdc.set(KEY_BASE_CRIT_CHANCE, PersistentDataType.DOUBLE, basecritChance)
-        pdc.set(KEY_BASE_CRIT_MULTIPLIER, PersistentDataType.DOUBLE, basecritMultiplier)
         pdc.set(ENTRY_ID, PersistentDataType.STRING, id)
 
         newMeta.displayName(oldDisplayName)
@@ -66,22 +63,9 @@ class ItemTypeSword(
     }
 
     companion object {
-        val KEY_BASE_DAMAGE = NamespacedKey("chaos", "sword_base_damage")
-        val KEY_BASE_CRIT_CHANCE = NamespacedKey("chaos", "sword_base_crit_chance")
-        val KEY_BASE_CRIT_MULTIPLIER = NamespacedKey("chaos", "sword_base_crit_multiplier")
         val ENTRY_ID = NamespacedKey("chaos", "entry_id")
 
 
-        fun getSwordStats(itemStack: ItemStack): SwordStats? {
-            val meta = itemStack.itemMeta ?: return null
-            val pdc = meta.persistentDataContainer
-
-            val baseDamage = pdc.get(KEY_BASE_DAMAGE, PersistentDataType.DOUBLE) ?: return null
-            val critChance = pdc.get(KEY_BASE_CRIT_CHANCE, PersistentDataType.DOUBLE) ?: return null
-            val critMultiplier = pdc.get(KEY_BASE_CRIT_MULTIPLIER, PersistentDataType.DOUBLE) ?: return null
-
-            return SwordStats(baseDamage, critChance, critMultiplier)
-        }
 
 
         fun getSwordID(itemStack: ItemStack): String? {

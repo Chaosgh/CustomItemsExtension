@@ -7,11 +7,8 @@ import com.typewritermc.engine.paper.entry.entries.ConstVar
 import com.typewritermc.engine.paper.logger
 import com.typewritermc.engine.paper.plugin
 import de.chaos.entries.statics.CustomItemEntry
-import de.chaos.listeners.ArmorHitListener
-import de.chaos.listeners.BowDamageListener
-import de.chaos.listeners.SwordDamageListener
-import de.chaos.listeners.ToolBreakListener
-import de.chaos.listeners.ItemsGuiListener
+import de.chaos.listeners.*
+import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.TextDecoration
 import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.Material
@@ -30,46 +27,52 @@ object Initializer : Initializable {
     private lateinit var itemsGuiListener: ItemsGuiListener
 
     override suspend fun initialize() {
-
+        // Listener registrieren
         swordListener = SwordDamageListener.register(javaPlugin)
         bowListener = BowDamageListener.register(javaPlugin)
         armorListener = ArmorHitListener.register(javaPlugin)
         toolListener = ToolBreakListener.register(javaPlugin)
         itemsGuiListener = ItemsGuiListener.register(javaPlugin)
 
-
+        // Custom Items aus Entries laden
         val entries = Query.find<CustomItemEntry>().sortedBy { it.id }
 
         entries.forEach { entry ->
-            val itemComponent = entry.customItem
-            if (itemComponent == null) {
-                return@forEach
-            }
+            val itemComponent = entry.customItem ?: return@forEach
+            if (entry.displayName.isBlank()) return@forEach
 
-            val displayNameString = entry.displayName
-            if (displayNameString.isBlank()) {
-                return@forEach
-            }
-
-            val displayNameComponent = miniMessage.deserialize(displayNameString)
+            // DisplayName: behält Farbe, aber ohne Italic
+            val displayNameComponent = miniMessage.deserialize(entry.displayName)
                 .decoration(TextDecoration.ITALIC, false)
 
-            val material = when (val matVar = (entry.item as? ConstVar)?.value?.material) {
-                is ConstVar -> matVar.value
-                else -> {
-                    Material.STONE
+            // Lore: grau + ohne Italic
+            val lore: List<Component> = entry.lore
+                .split("\n")
+                .filter { it.isNotBlank() }
+                .map { line ->
+                    miniMessage.deserialize("<gray>$line</gray>")
+                        .decoration(TextDecoration.ITALIC, false)
                 }
+
+
+            val material: Material = when (entry.item) {
+                is ConstVar -> entry.item.value
+                else -> Material.STONE
             }
+
+
 
             val customItem = CustomItem(
                 id = entry.id,
                 material = material,
                 component = itemComponent,
-                displayName = displayNameComponent
+                displayName = displayNameComponent,
+                lore = lore
             )
             CustomItemRegistry.register(customItem)
         }
 
+        // Direkt Items bauen (Fehler abfangen)
         CustomItemRegistry.getAll().forEach { ci ->
             try {
                 ci.buildItemStack()
