@@ -10,9 +10,8 @@ import com.typewritermc.engine.paper.entry.entries.ActionEntry
 import com.typewritermc.engine.paper.entry.entries.ActionTrigger
 import com.typewritermc.engine.paper.logger
 import de.chaos.ItemsGui
-import org.bukkit.Bukkit
+import com.typewritermc.engine.paper.plugin
 import org.bukkit.entity.Player
-import org.bukkit.plugin.Plugin
 
 @Entry("open_item_gui", "opens the gui with all the custom items", Colors.RED, "pixel:bullet-list")
 class OpenItemGuiEntry(
@@ -28,7 +27,7 @@ class OpenItemGuiEntry(
         val player: Player = player ?: return
 
 
-        val typewriterPlugin: Plugin? = Bukkit.getPluginManager().getPlugin("Typewriter")
+        val typewriterPlugin = plugin
 
         if (typewriterPlugin == null || !typewriterPlugin.isEnabled) {
             logger.severe("Typewriter plugin could not be found or is disabled. Cannot open GUI.")

@@ -27,7 +27,7 @@ typewriter {
         shortDescription = "Item TypeWriter Addon"
         description =
             "A addon for TypeWriter. This plugin provides custom items such as swords, bows armor and other things"
-        engineVersion = "0.9.0-beta-163"
+        engineVersion = "0.9.0-beta-165"
         channel = com.typewritermc.moduleplugin.ReleaseChannel.BETA
 
         dependencies {

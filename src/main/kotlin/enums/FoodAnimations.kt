@@ -1,5 +1,4 @@
-package de.chaos.entries.action
-
+package de.chaos.enums
 
 enum class FoodAnimations(val animationName: String, val description: String) {
     NONE("none", "No animation, item is consumed instantly"),

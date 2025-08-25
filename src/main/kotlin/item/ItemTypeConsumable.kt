@@ -6,7 +6,7 @@ import com.typewritermc.core.extension.annotations.Help
 import com.typewritermc.engine.paper.entry.entries.ConstVar
 import com.typewritermc.engine.paper.entry.entries.Var
 import com.typewritermc.engine.paper.utils.Sound
-import de.chaos.entries.action.FoodAnimations
+import de.chaos.enums.FoodAnimations
 import de.chaos.item.itemComponents.ItemComponent
 import de.chaos.item.consumableComponents.ConsumableComponent
 import de.chaos.item.consumableComponents.ConsumableComponentHolder
