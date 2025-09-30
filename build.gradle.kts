@@ -1,10 +1,10 @@
 plugins {
     kotlin("jvm") version "2.0.21"
-    id("com.typewritermc.module-plugin") version "1.1.3"
+    id("com.typewritermc.module-plugin") version "2.0.0"
 }
 
 group = "de.chaos"
-version = "0.1.0"
+version = "0.2.0"
 
 
 repositories {
